@@ -1,0 +1,7 @@
+/In:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in"
+/Lib:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in"
+/Lib:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private"
+/Lib:"C:\Program Files (x86)\Windows Kits\10\References\10.0.15063.0\Windows.System.SystemManagementContract\3.0.0.0"
+/WinMD:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\WinMetadata\Windows.winmd"
+/RdXmlPath:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\LibraryXML"
+/RunOnlyPreDR

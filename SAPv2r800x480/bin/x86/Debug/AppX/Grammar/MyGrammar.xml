@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<grammar
+	version="1.0"
+	xml:lang="en-US"	
+	xmlns="http://www.w3.org/2001/06/grammar"
+	root="voiceCommands">
+	<rule id="voiceCommands">
+    <one-of>
+    <item>
+			<ruleref uri="#greetLeo"/>				
+		</item>
+    <item>
+      <ruleref uri="#callLeo"/>
+    </item>  
+    </one-of>
+	</rule>  
+	<rule id="callLeo">
+		<item>Hey Leo,</item>								
+		<ruleref uri="#heyLeo"/>    
+	</rule>
+  <rule id="heyLeo">
+		<one-of>
+      <item>turn the monitor off!</item>
+      <item>turn the monitor on!</item>
+      <item>switch the light off!</item>
+      <item>switch the light on!</item>
+      <item>turn the LED off!</item>
+      <item>turn the LED on!</item>
+      <item>what time is it?</item>
+      <item>what day is it?</item>
+      <item>who are you?</item>
+      <item>what are you?</item>
+      <item>what is the date today?</item>		
+      <item>where am I?</item>
+      <item>what's up?</item>
+      <item>where are we?</item>      
+		</one-of>		
+	</rule>
+  <rule id="greetLeo">
+    <item>Leo!</item> 
+  </rule> 
+</grammar>
+

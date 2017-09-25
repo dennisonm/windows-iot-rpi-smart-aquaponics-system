@@ -1,0 +1,47 @@
+ /debug:pdbonly
+ /nowarn:0436;0618;1668;1685;1701;1702
+ /debug+
+ /nostdlib+
+ /optimize+
+ /out:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop.dll"
+ /pdb:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop.pdb"
+ /platform:x64
+ /warnaserror+
+ /unsafe
+ /nologo
+ /target:library
+ /define:MCG_PRE_BUILD
+ /define:WIN64
+ /define:AMD64
+ /define:ALIGN_ACCESS
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private\System.Private.CoreLib.dll"
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private\System.Private.CoreLib.InteropServices.dll"
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private\System.Private.Interop.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Private.Uri.dll"
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private\System.Private.CompilerServices.ICastable.dll"
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private\System.Private.Reflection.dll"
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private\System.Private.DispatchProxy.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Reflection.DispatchProxy.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Reflection.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Runtime.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Runtime.InteropServices.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Runtime.InteropServices.WindowsRuntime.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Numerics.Vectors.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Threading.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Diagnostics.Debug.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Runtime.WindowsRuntime.UI.Xaml.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\TransformedSRWR\System.Runtime.WindowsRuntime.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Dynamic.Runtime.dll"
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.compiler\1.7.0\tools\x64\ilc\lib\Private\System.Private.CoreLib.Augments.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Runtime.Extensions.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.Collections.dll"
+ /r:"H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\in\System.ObjectModel.dll"
+ /r:"C:\Users\denni\.nuget\packages\microsoft.net.native.sharedlibrary-x64\1.7.0\tools\SharedLibrary\ret\AnalysisILToc\System.Private.SharedLibrary.Interop.Generated.iltoc"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\Adapters.g.cs"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\AssemblyInfo.g.cs"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\Data.g.cs"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\Helpers.g.cs"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\ImplTypes.g.cs"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\PInvoke.g.cs"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\SafeTypes.g.cs"
+ "H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\x64\Release\ilc\intermediate\SAP.McgInterop\SharedStubs.g.cs"
