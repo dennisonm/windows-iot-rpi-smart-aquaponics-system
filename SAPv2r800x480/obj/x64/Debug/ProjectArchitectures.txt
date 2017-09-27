@@ -1,1 +1,0 @@
-H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\SAPv2r800x480.csproj;x64

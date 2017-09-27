@@ -1,1 +1,0 @@
-H:\Dropbox\Projects\IoT\SIAPS\SIAPS\SIAPS.csproj;x86

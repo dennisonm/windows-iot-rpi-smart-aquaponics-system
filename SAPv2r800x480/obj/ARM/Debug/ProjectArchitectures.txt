@@ -1,1 +1,0 @@
-H:\Dropbox\Projects\IoT\SIAPS\SIAPSv2r800x480\SIAPSv2r800x480.csproj;arm
