@@ -1,7 +1,7 @@
 ## Smart monitoring and control systems for Aquaponics on RPI with Windows 10 IoT Core
 
 ## Originator
-	Myron Richard Dennison ([dennisonmra@gmail.com](mailto:dennisonmra@gmail))
+- Myron Richard Dennison ([dennisonmra@gmail.com](mailto:dennisonmra@gmail))
 
 ## Hardware
 	- RPI 3
