@@ -7,7 +7,7 @@
 	- RPI 3
 	- 7" touchscreen display
 	- small speaker with aux input
-	- Sensors (Not wired to this. We are getting the values remotely through http)
+	- Sensors 
 		water temperature
 		ambient temperature
 		flow rate
