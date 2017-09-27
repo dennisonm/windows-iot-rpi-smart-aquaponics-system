@@ -580,4 +580,5 @@ H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\
 H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\ARM\Release\ilc\intermediate\TransformedSRWR\System.Runtime.WindowsRuntime.dll
 H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\ARM\Release\ilc\intermediate\TransformedSRWR\System.Runtime.WindowsRuntime.dll.ILTransformTask.repro
 H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\ARM\Release\ilc\intermediate\TransformedSRWR\System.Runtime.WindowsRuntime.pdb
-H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\ARM\Release\SAPv2r800x480.csprojResolveAssemblyReference.cache
+H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Assets\powerbutton.png
+H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\obj\ARM\Release\ilc\in\Assets\powerbutton.png

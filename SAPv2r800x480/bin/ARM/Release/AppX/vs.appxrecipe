@@ -19,7 +19,7 @@
     <DeployOptionalPackages>false</DeployOptionalPackages>
     <WindowsSdkPath>C:\Program Files %28x86%29\Windows Kits\10\</WindowsSdkPath>
     <LayoutDir>H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\AppX</LayoutDir>
-    <RegisteredManifestChecksum>DBDEBB3C4B6CC3E0CE19515B86AF371D90FD2F53BE7AD151E3EAC29F110717C3</RegisteredManifestChecksum>
+    <RegisteredManifestChecksum>ED53659B5BF1E1B74085877FE8D98CA620CA3F3D3D60512EB68E3743FFB23375</RegisteredManifestChecksum>
     <RegisteredPackageMoniker>bd75eb2e-e875-460d-b9d3-9c56e43418a7_1.0.0.0_arm__kt0fgx0pevqqm</RegisteredPackageMoniker>
     <RegisteredUserModeAppID>bd75eb2e-e875-460d-b9d3-9c56e43418a7_kt0fgx0pevqqm!App</RegisteredUserModeAppID>
     <RegisteredPackageID>bd75eb2e-e875-460d-b9d3-9c56e43418a7</RegisteredPackageID>
@@ -31,13 +31,17 @@
     <AppXManifest Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2017-09-25T14:45:08.342</Modified>
+      <Modified>2017-09-27T13:44:44.890</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Assets\LockScreenLogo.scale-200.png">
       <PackagePath>Assets\LockScreenLogo.scale-200.png</PackagePath>
       <Modified>2017-08-08T14:38:25.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Assets\powerbutton.png">
+      <PackagePath>Assets\powerbutton.png</PackagePath>
+      <Modified>2017-09-27T11:32:21.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Assets\SplashScreen.scale-200.png">
       <PackagePath>Assets\SplashScreen.scale-200.png</PackagePath>
@@ -216,7 +220,7 @@
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\resources.pri">
       <PackagePath>resources.pri</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2017-09-25T14:31:27.288</Modified>
+      <Modified>2017-09-27T13:41:20.000</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Robmikh.CompositionSurfaceFactory.dll">
       <PackagePath>Robmikh.CompositionSurfaceFactory.dll</PackagePath>
@@ -228,11 +232,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\SAP.dll">
       <PackagePath>SAP.dll</PackagePath>
-      <Modified>2017-09-25T14:45:08.264</Modified>
+      <Modified>2017-09-27T13:44:44.635</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\SAP.exe">
       <PackagePath>SAP.exe</PackagePath>
-      <Modified>2017-09-25T14:45:08.269</Modified>
+      <Modified>2017-09-27T13:44:44.714</Modified>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>

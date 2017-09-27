@@ -156,7 +156,7 @@ namespace SAP.SAPv2r800x480_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[13];
+            _typeNameTable = new string[11];
             _typeNameTable[0] = "Microsoft.Toolkit.Uwp.UI.Controls.RadialGauge";
             _typeNameTable[1] = "Windows.UI.Xaml.Controls.Control";
             _typeNameTable[2] = "Boolean";
@@ -165,13 +165,11 @@ namespace SAP.SAPv2r800x480_XamlTypeInfo
             _typeNameTable[5] = "Windows.UI.Xaml.Media.SolidColorBrush";
             _typeNameTable[6] = "String";
             _typeNameTable[7] = "Windows.UI.Xaml.Media.Brush";
-            _typeNameTable[8] = "SAP.Gauges";
+            _typeNameTable[8] = "SAP.MainPage";
             _typeNameTable[9] = "Windows.UI.Xaml.Controls.Page";
             _typeNameTable[10] = "Windows.UI.Xaml.Controls.UserControl";
-            _typeNameTable[11] = "SAP.MainPage";
-            _typeNameTable[12] = "SAP.Settings";
 
-            _typeTable = new global::System.Type[13];
+            _typeTable = new global::System.Type[11];
             _typeTable[0] = typeof(global::Microsoft.Toolkit.Uwp.UI.Controls.RadialGauge);
             _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Control);
             _typeTable[2] = typeof(global::System.Boolean);
@@ -180,11 +178,9 @@ namespace SAP.SAPv2r800x480_XamlTypeInfo
             _typeTable[5] = typeof(global::Windows.UI.Xaml.Media.SolidColorBrush);
             _typeTable[6] = typeof(global::System.String);
             _typeTable[7] = typeof(global::Windows.UI.Xaml.Media.Brush);
-            _typeTable[8] = typeof(global::SAP.Gauges);
+            _typeTable[8] = typeof(global::SAP.MainPage);
             _typeTable[9] = typeof(global::Windows.UI.Xaml.Controls.Page);
             _typeTable[10] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
-            _typeTable[11] = typeof(global::SAP.MainPage);
-            _typeTable[12] = typeof(global::SAP.Settings);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -220,9 +216,7 @@ namespace SAP.SAPv2r800x480_XamlTypeInfo
         }
 
         private object Activate_0_RadialGauge() { return new global::Microsoft.Toolkit.Uwp.UI.Controls.RadialGauge(); }
-        private object Activate_8_Gauges() { return new global::SAP.Gauges(); }
-        private object Activate_11_MainPage() { return new global::SAP.MainPage(); }
-        private object Activate_12_Settings() { return new global::SAP.Settings(); }
+        private object Activate_8_MainPage() { return new global::SAP.MainPage(); }
 
         private global::Windows.UI.Xaml.Markup.IXamlType CreateXamlType(int typeIndex)
         {
@@ -292,9 +286,9 @@ namespace SAP.SAPv2r800x480_XamlTypeInfo
                 xamlType = new global::SAP.SAPv2r800x480_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 8:   //  SAP.Gauges
+            case 8:   //  SAP.MainPage
                 userType = new global::SAP.SAPv2r800x480_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_8_Gauges;
+                userType.Activator = Activate_8_MainPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -305,20 +299,6 @@ namespace SAP.SAPv2r800x480_XamlTypeInfo
 
             case 10:   //  Windows.UI.Xaml.Controls.UserControl
                 xamlType = new global::SAP.SAPv2r800x480_XamlTypeInfo.XamlSystemBaseType(typeName, type);
-                break;
-
-            case 11:   //  SAP.MainPage
-                userType = new global::SAP.SAPv2r800x480_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_11_MainPage;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 12:   //  SAP.Settings
-                userType = new global::SAP.SAPv2r800x480_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_12_Settings;
-                userType.SetIsLocalType();
-                xamlType = userType;
                 break;
             }
             return xamlType;

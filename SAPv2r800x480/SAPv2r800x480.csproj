@@ -110,6 +110,7 @@
     <None Include="SAP_Key.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\powerbutton.png" />
     <Content Include="Assets\switch-off.png" />
     <Content Include="Assets\switch-on.png" />
     <Content Include="Properties\Default.rd.xml" />

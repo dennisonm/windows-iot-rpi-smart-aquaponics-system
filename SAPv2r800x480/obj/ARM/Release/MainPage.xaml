@@ -83,13 +83,37 @@
         <!-- Header -->
         <Border Grid.Row="0" Background="#D000">
             <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
                 <TextBlock x:ConnectionId='23' x:Name="pageTitle" 
+                           Grid.Column="1"
                            Margin="0,10,0,10" 
                            FontSize="30" 
                            HorizontalAlignment="Center" 
                            Foreground="#EEEADCDC">
                     Smart Aquaponics System Prototype V2.0
                 </TextBlock>
+                <Button x:ConnectionId='24' Name="PowerBtn" 
+                            Content="" 
+                            Grid.Column="2"
+                            Margin="0,0,10,0" 
+                            HorizontalAlignment="Right" 
+                            VerticalAlignment="Center"                     
+                            Width="40" Height="40">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:ConnectionId='25' Text="Restart"                      />
+                            <MenuFlyoutItem x:ConnectionId='26' Text="Shutdown"                       />                            
+                        </MenuFlyout>
+                    </Button.Flyout>
+                    <Button.Background>
+                        <ImageBrush Stretch="Fill" ImageSource="Assets/powerbutton.png"/>
+                    </Button.Background>
+                </Button>
             </Grid>
         </Border>
 

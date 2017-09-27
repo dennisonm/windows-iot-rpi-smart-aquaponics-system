@@ -28,6 +28,9 @@
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Assets\LockScreenLogo.scale-200.png">
       <PackagePath>Assets\LockScreenLogo.scale-200.png</PackagePath>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Assets\powerbutton.png">
+      <PackagePath>Assets\powerbutton.png</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\bin\ARM\Release\ilc\Assets\SplashScreen.scale-200.png">
       <PackagePath>Assets\SplashScreen.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>

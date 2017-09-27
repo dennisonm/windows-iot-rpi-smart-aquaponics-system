@@ -25,10 +25,8 @@
       <RootProperty Name="VerticalAlignment" />
       <RootProperty Name="Width" />
       <RootProperty Name="Height" />
-      <RootProperty Name="VerticalContentAlignment" />
-      <RootProperty Name="HorizontalContentAlignment" />
-      <RootProperty Name="Style" />
       <RootProperty Name="Background" />
+      <RootProperty Name="Flyout" />
       <RootEvent Name="Click" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Control">
@@ -166,41 +164,17 @@
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Border">
       <RootProperty Name="Background" />
-      <RootProperty Name="Height" />
       <RootProperty Name="Child" />
-    </RootType>
-    <RootType FullName="Microsoft.Xaml.DirectUI.ProxyTypes.StaticResourceExtension" />
-    <RootType FullName="Windows.UI.Xaml.Media.ImageBrush">
-      <RootProperty Name="ImageSource" />
-      <RootProperty Name="Stretch" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Data.Binding">
       <RootProperty Name="Mode" />
-    </RootType>
-    <RootType FullName="SAP.Gauges" />
-    <RootType FullName="Windows.UI.Xaml.Controls.CheckBox">
-      <RootProperty Name="Content" />
-      <RootProperty Name="HorizontalAlignment" />
-      <RootProperty Name="Margin" />
-      <RootProperty Name="FontSize" />
-      <RootProperty Name="Foreground" />
-      <RootProperty Name="VerticalAlignment" />
-      <RootProperty Name="VerticalContentAlignment" />
-      <RootEvent Name="Checked" />
-      <RootEvent Name="Unchecked" />
-    </RootType>
-    <RootType FullName="Windows.UI.Xaml.Shapes.Ellipse">
-      <RootProperty Name="Fill" />
-      <RootProperty Name="Stroke" />
-      <RootProperty Name="Width" />
-      <RootProperty Name="Height" />
-      <RootProperty Name="Margin" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.StackPanel">
       <RootProperty Name="Children" />
       <RootProperty Name="Orientation" />
       <RootProperty Name="HorizontalAlignment" />
       <RootProperty Name="VerticalAlignment" />
+      <RootProperty Name="Height" />
       <RootProperty Name="Margin" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.RadioButton">
@@ -209,7 +183,17 @@
       <RootProperty Name="VerticalAlignment" />
       <RootEvent Name="Checked" />
     </RootType>
+    <RootType FullName="Windows.UI.Xaml.Media.ImageBrush">
+      <RootProperty Name="Stretch" />
+      <RootProperty Name="ImageSource" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.MenuFlyout">
+      <RootProperty Name="Items" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.MenuFlyoutItem">
+      <RootProperty Name="Text" />
+      <RootEvent Name="Click" />
+    </RootType>
     <RootType FullName="SAP.MainPage" />
-    <RootType FullName="SAP.Settings" />
   </Roots.RootTypes>
 </Roots>

@@ -11,8 +11,6 @@ using Windows.Devices.Gpio;
 using Windows.UI.Xaml.Media;
 using System.Xml.Linq;
 using Windows.UI.Xaml.Media.Imaging;
-using Windows.ApplicationModel.Activation;
-using Windows.ApplicationModel.Core;
 
 namespace SAP
 {
@@ -27,7 +25,7 @@ namespace SAP
         // Dispatcher timer for aquaponics light switch 
         private DispatcherTimer DispatcherLightTimer = new DispatcherTimer();
 
-        // Dispatcher timer for the sensor reading updates
+        // Dispatcher timer for gauge update
         private DispatcherTimer DispatcherUpdateGaugeTimer = new DispatcherTimer();
 
         // Initializes a new instance of the XDocument class (represents an XML document)
@@ -246,6 +244,11 @@ namespace SAP
             return location.Trim();
         }     
 
+        /// <summary>
+        /// 12-hr clock time keeping convention
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void TwelveHrCb_Checked(object sender, RoutedEventArgs e)
         {
             if(twelveHrCbPreviousState == false)
@@ -259,6 +262,11 @@ namespace SAP
             
         }
 
+        /// <summary>
+        /// 24-hr clock convention
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void TwentyFourHrCb_Checked(object sender, RoutedEventArgs e)
         {
             if(twentyFourHrCbPreviousState == false)
@@ -338,13 +346,13 @@ namespace SAP
         /// </summary>
         public void UpdateGauges()
         {
-            float wtemp;
-            float atemp;
-            float rh;
-            float fr;
-            float ph;
-            float do2;
-            string tstamp;
+            float wtemp;    // water temperature
+            float atemp;    // ambient temperature
+            float rh;       // relative humidity
+            float fr;       // flow rate
+            float ph;       // water pH value
+            float do2;      // dissolved oxygen in the water
+            string tstamp;  // last update
 
             try
             {
@@ -412,6 +420,29 @@ namespace SAP
         private void WaterPumpBtn_Click(object sender, RoutedEventArgs e)
         {
             Speak("Water pump automatic control is currently disabled.");            
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Restart_Click(object sender, RoutedEventArgs e)
+        {
+            Speak("Rebooting the system.");
+            Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));		//Delay before restart after shutdown
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Shutdown_Click(object sender, RoutedEventArgs e)
+        {
+            Speak("Shutting down.");
+            Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Shutdown, TimeSpan.FromSeconds(1));		//Delay is not relevant to shutdown
         }
     }
 }

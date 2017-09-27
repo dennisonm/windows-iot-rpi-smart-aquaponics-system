@@ -415,14 +415,14 @@
     <AppxPackagedFile Include="C:\Users\denni\.nuget\packages\Win2D.uwp\1.19.0\lib\uap10.0\Microsoft.Graphics.Canvas.winmd">
       <PackagePath>Microsoft.Graphics.Canvas.winmd</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\Home-icon.png">
-      <PackagePath>Assets\Home-icon.png</PackagePath>
+    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\powerbutton.png">
+      <PackagePath>Assets\powerbutton.png</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\Sensor-icon.png">
-      <PackagePath>Assets\Sensor-icon.png</PackagePath>
+    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\switch-off.png">
+      <PackagePath>Assets\switch-off.png</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\Settings-icon.png">
-      <PackagePath>Assets\Settings-icon.png</PackagePath>
+    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\switch-on.png">
+      <PackagePath>Assets\switch-on.png</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\LockScreenLogo.scale-200.png">
       <PackagePath>Assets\LockScreenLogo.scale-200.png</PackagePath>
@@ -450,9 +450,6 @@
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Assets\Wide310x150Logo.scale-200.png">
       <PackagePath>Assets\Wide310x150Logo.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-    </AppxPackagedFile>
-    <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Grammar\MyVocabularies.xml">
-      <PackagePath>Grammar\MyVocabularies.xml</PackagePath>
     </AppxPackagedFile>
     <AppxPackagedFile Include="H:\Dropbox\Projects\IoT\Windows IoT\RPI\windows-iot-rpi-smart-aquaponics-system\SAPv2r800x480\Properties\Default.rd.xml">
       <PackagePath>Properties\Default.rd.xml</PackagePath>
