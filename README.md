@@ -1,10 +1,21 @@
 ## Smart monitoring and control systems for Aquaponics on RPI with Windows 10 IoT Core
 
 ## Originator
-- Myron Richard Dennison ([dennisonmra@gmail.com](mailto:dennisonmra@gmail))
+	Myron Richard Dennison ([dennisonmra@gmail.com](mailto:dennisonmra@gmail))
 
 ## Hardware
-	TBA
+	- RPI 3
+	- 7" touchscreen display
+	- small speaker with aux input
+	- Sensors (Not wired to this. We are getting the values remotely through http)
+		water temperature
+		ambient temperature
+		flow rate
+		relative humidity
+		pH level
+		dissolved oxygen
+	- aquaponics setup with grow and tank lights
+	- relay module for the lights
 	
 ## License
 
