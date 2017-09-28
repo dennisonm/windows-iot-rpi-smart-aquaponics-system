@@ -17,10 +17,7 @@ namespace SAP
     public sealed partial class MainPage : Page
     {
         // Dispatcher timer for the clock 
-        private DispatcherTimer DispatcherClockTimer = new DispatcherTimer();
-        private static bool twentyFourHrCbPreviousState = false;
-        private static bool twelveHrCbPreviousState = true;
-        private static bool broadcasted = false;
+        private DispatcherTimer DispatcherClockTimer = new DispatcherTimer();        
 
         // Dispatcher timer for aquaponics light switch 
         private DispatcherTimer DispatcherLightTimer = new DispatcherTimer();
@@ -37,7 +34,14 @@ namespace SAP
 
         // RPI GPIO Settings
         private const int LightSwitch_PIN = 23;        
-        private GpioPin LightSwitchPin;        
+        private GpioPin LightSwitchPin;
+
+        // Variables
+        private static bool twentyFourHrCbPreviousState = false;
+        private static bool twelveHrCbPreviousState = true;
+        private static bool broadcasted = false;
+        private static int updateGaugesErrorCounter = 0;
+        private static int httpResponseErrorCounter = 0;
 
         public MainPage()
         {
@@ -58,12 +62,6 @@ namespace SAP
             DispatcherLightTimer.Interval = TimeSpan.FromSeconds(60);
             DispatcherLightTimer.Tick += DispatcherLightTimer_Tick;
             
-            // 
-            //Speak(
-            //    "Hi, my name is Leo. I am your intelligent agent for Project Leo: Prototype Version 1.0." +
-            //    "  " +
-            //    "and the latest version of Smart Aquaponics System Prototype Version 2.0.");
-
             // Update Location TextBlock                       
             if (GetLocationByIPAddress() == null || GetLocationByIPAddress() == "")
             {
@@ -344,7 +342,7 @@ namespace SAP
         /// <summary>
         /// 
         /// </summary>
-        public void UpdateGauges()
+        private void UpdateGauges()
         {
             float wtemp;    // water temperature
             float atemp;    // ambient temperature
@@ -366,8 +364,16 @@ namespace SAP
                     }
                     catch (Exception)
                     {
+                        ++httpResponseErrorCounter;
                         this.SystemStatusTb.Text = "Exception: Get HTTP Response Error!";
                         Speak("Error encountered while getting sensor updates from the database.");
+                        if (httpResponseErrorCounter == 4)
+                            Speak("Will try to establish connection again. If still unsuccessful, the system will be rebooted.");
+                        if (httpResponseErrorCounter == 5)
+                        {
+                            Speak("Rebooting the system.");
+                            Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));
+                        }
                     }
                     httpClient.Dispose();
                 }
@@ -386,8 +392,16 @@ namespace SAP
             }
             catch (Exception)
             {
+                ++updateGaugesErrorCounter;
                 this.SystemStatusTb.Text = "Exception: Update Gauges Error!";
                 Speak("Unable to update Gauges. Please check the server or your internet connection.");
+                if (updateGaugesErrorCounter == 4)                    
+                    Speak("Will try to update again. If still unsuccessful, the system will be rebooted.");
+                if (updateGaugesErrorCounter == 5)
+                {
+                    Speak("Rebooting the system.");
+                    Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));
+                }
             }
         }
 
