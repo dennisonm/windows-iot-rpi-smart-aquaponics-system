@@ -95,7 +95,7 @@
                            FontSize="30" 
                            HorizontalAlignment="Center" 
                            Foreground="#EEEADCDC">
-                    Smart Aquaponics System Prototype V2.0
+                    Smart Aquaponics System V2.0
                 </TextBlock>
                 <Button Name="PowerBtn" 
                             Content="" 
@@ -131,7 +131,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="500"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center" Height="80">

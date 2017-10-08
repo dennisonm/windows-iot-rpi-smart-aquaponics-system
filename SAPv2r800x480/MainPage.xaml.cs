@@ -167,8 +167,8 @@ namespace SAP
             TwentyFourHrCb.IsChecked = twentyFourHrCbPreviousState;
             TwelveHrCb.IsChecked = twelveHrCbPreviousState;
             
-            this.Lbl_Time.Text = (TwelveHrCb.IsChecked == true) ? DateTime.Now.ToString("hh:mm tt") : DateTime.Now.ToString("HH:mm tt");
-            this.Lbl_Date.Text = DateTime.Now.ToString("MMMM dd, yyyy");
+            this.Lbl_Time.Text = (TwelveHrCb.IsChecked == true) ? DateTime.Now.ToString("hh:mm tt") : DateTime.Now.ToString("HH:mm ddd");
+            this.Lbl_Date.Text = (TwelveHrCb.IsChecked == true) ? DateTime.Now.ToString("dddd, MMMM dd, yyyy") : DateTime.Now.ToString("MMMM dd, yyyy");
             if (DateTime.Now.Minute == 0 && broadcasted == false && DateTime.Now.Hour > 5)
             {
                 if (DateTime.Now.Hour <= 12)
@@ -273,7 +273,7 @@ namespace SAP
             twelveHrCbPreviousState = false;
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                this.Lbl_Time.Text = DateTime.Now.ToString("HH:mm tt"); // 24hr format
+                this.Lbl_Time.Text = DateTime.Now.ToString("HH:mm ddd"); // 24hr format
             }); 
         }       
         
