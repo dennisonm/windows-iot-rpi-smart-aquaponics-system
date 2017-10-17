@@ -88,7 +88,17 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                
+                <Button Name="AlarmLbl"
+                            Content="" 
+                            Grid.Column="0"
+                            Margin="10,0,0,0"                            
+                            HorizontalAlignment="Left" 
+                            VerticalAlignment="Center"                     
+                            Width="40" Height="40">
+                    <Button.Background>
+                        <ImageBrush Stretch="Fill" ImageSource="Assets/Red-LED.png"/>
+                    </Button.Background>
+                </Button>
                 <TextBlock x:Name="pageTitle" 
                            Grid.Column="1"
                            Margin="0,10,0,10" 
@@ -107,17 +117,18 @@
                     <Button.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Restart" Click="Restart_Click"/>
-                            <MenuFlyoutItem Text="Shutdown" Click="Shutdown_Click"/>                            
+                            <MenuFlyoutItem Text="Shutdown" Click="Shutdown_Click"/>
+                            <MenuFlyoutItem Text="Send Test Email" Click="SendMail_Click"/>
                         </MenuFlyout>
                     </Button.Flyout>
                     <Button.Background>
-                        <ImageBrush Stretch="Fill" ImageSource="Assets/powerbutton.png"/>
+                        <ImageBrush Stretch="Fill" ImageSource="Assets/Power-Button.png"/>
                     </Button.Background>
                 </Button>
             </Grid>
         </Border>
 
-        <!-- Date Time -->
+        <!-- Date, Time, Lights/Pump Switches -->
         <Grid Grid.Row="1">
             <StackPanel>
                 <TextBlock x:Name="Lbl_Date" 
@@ -129,50 +140,69 @@
                 </TextBlock>
                 <Grid VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="500"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="550"/>
+                        <ColumnDefinition Width="100"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center" Height="80">
-                        <TextBlock x:Name="LightLbl"                             
-                            Text="Grow/Tank Light" 
-                            Margin="10,11,0,0" 
+                    <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center" Height="120">
+                        <TextBlock x:Name="GrowLightLbl"                             
+                            Text="Grow Light" 
+                            Margin="10,13,0,0" 
                             Foreground="#EEEADCDC"
                             VerticalAlignment="Center" 
                             HorizontalAlignment="Right"
                             TextAlignment="Left"                       
                             FontSize="15" />
-                        <TextBlock x:Name="PumpLbl"                             
+                        <TextBlock x:Name="TankLightLbl"                             
+                            Text="Tank Light" 
+                            Margin="10,20,0,0" 
+                            Foreground="#EEEADCDC"
+                            VerticalAlignment="Center" 
+                            HorizontalAlignment="Right"
+                            TextAlignment="Left"                       
+                            FontSize="15" />
+                        <TextBlock x:Name="WaterPumpLbl"                             
                             Text="Water Pump" 
-                            Margin="10,22,0,0" 
+                            Margin="10,20,0,0" 
                             Foreground="#EEEADCDC"
                             VerticalAlignment="Center" 
                             HorizontalAlignment="Right"
                             TextAlignment="Left"                       
                             FontSize="15" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Height="80">
-                        <Button Name="LightBtn" 
+                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Height="120">
+                        <Button Name="GrowLightBtn" 
                             Content="" 
-                            Margin="5,5,35,0" 
-                            Click="LightBtn_Click" 
+                            Margin="5,5,0,0" 
+                            Click="GrowLightBtn_Click" 
                             HorizontalAlignment="Left" 
                             VerticalAlignment="Center"                     
                             Width="40" Height="40">
                             <Button.Background>
-                                <ImageBrush Stretch="Fill" ImageSource="Assets/switch-off.png"/>
+                                <ImageBrush Stretch="Fill" ImageSource="Assets/Switch-On.png"/>
+                            </Button.Background>
+                        </Button>
+                        <Button Name="TankLightBtn" 
+                            Content="" 
+                            Margin="5,0,0,0" 
+                            Click="TankLightBtn_Click" 
+                            HorizontalAlignment="Left" 
+                            VerticalAlignment="Center"                     
+                            Width="40" Height="40">
+                            <Button.Background>
+                                <ImageBrush Stretch="Fill" ImageSource="Assets/Switch-Off.png"/>
                             </Button.Background>
                         </Button>
                         <Button Name="WaterPumpBtn" 
                             Content="" 
-                            Margin="5,0,35,0" 
+                            Margin="5,0,0,0" 
                             Click="WaterPumpBtn_Click" 
                             HorizontalAlignment="Left" 
                             VerticalAlignment="Center"                     
                             Width="40" Height="40">
                             <Button.Background>
-                                <ImageBrush Stretch="Fill" ImageSource="Assets/switch-on.png"/>
+                                <ImageBrush Stretch="Fill" ImageSource="Assets/Switch-On.png"/>
                             </Button.Background>
                         </Button>
                     </StackPanel>
@@ -180,22 +210,31 @@
                                Grid.Column="2"
                                Foreground="#EEEADCDC" 
                                FontSize="100"
-                               Margin="0,0,50,0"
+                               Margin="0,0,0,0"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center">
-                            01:27 AM
-                    </TextBlock>
-                    <StackPanel Grid.Column="3" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,10,0,0">
-                        <RadioButton x:Name="TwelveHrCb" 
-                                     Content="12-HR" 
-                                     Checked="TwelveHrCb_Checked" 
-                                     VerticalContentAlignment="Top" 
-                                     VerticalAlignment="Bottom"/>
-                        <RadioButton x:Name="TwentyFourHrCb" 
-                                     Content="24-HR" 
-                                     Checked="TwentyFourHrCb_Checked" 
-                                     VerticalContentAlignment="Top" 
-                                     VerticalAlignment="Bottom"/>
+                            01:27:00 AM
+                    </TextBlock>            
+                    <StackPanel Grid.Column="3" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Button Name="FeedBtn"
+                                Content=""                                 
+                                Margin="0,15,0,0" 
+                                Click="FeedBtn_Click"
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center"                     
+                                Width="40" Height="40">
+                            <Button.Background>
+                                <ImageBrush Stretch="Fill" ImageSource="Assets/Red-Fish.png"/>
+                            </Button.Background>
+                        </Button>
+                        <TextBlock x:Name="FeedMeLbl"                             
+                            Text="Feed Me!" 
+                            Margin="0,0,0,0" 
+                            Foreground="Red"
+                            VerticalAlignment="Center" 
+                            HorizontalAlignment="Center"
+                            TextAlignment="Center"                       
+                            FontSize="15" />
                     </StackPanel>
                 </Grid>
                 <TextBlock x:Name="Lbl_Location" 

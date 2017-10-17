@@ -3,27 +3,40 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Collections.Generic;
+using System.Xml.Linq;
+using System.Diagnostics;
+using Windows.Media.SpeechSynthesis;
+using Windows.Devices.Gpio;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.Media.SpeechSynthesis;
-using Windows.Devices.Gpio;
 using Windows.UI.Xaml.Media;
-using System.Xml.Linq;
 using Windows.UI.Xaml.Media.Imaging;
+using Windows.ApplicationModel.Email;
+
+using LightBuzz.SMTP; 
 
 namespace SAP
 {
     public sealed partial class MainPage : Page
     {
-        // Dispatcher timer for the clock 
-        private DispatcherTimer DispatcherClockTimer = new DispatcherTimer();        
+        // Clock                
+        DispatcherTimer DispatcherClockTimer;                                           // DispatcherTimer for the clock 
+        private static bool broadcasted = false;
 
-        // Dispatcher timer for aquaponics light switch 
-        private DispatcherTimer DispatcherLightTimer = new DispatcherTimer();
+        // Automatic Switches         
+        DispatcherTimer DispatcherControlTimer;                                         // DispatcherTimer for aquaponics switches
+        private static bool inputOutputDevice = false;
 
-        // Dispatcher timer for gauge update
-        private DispatcherTimer DispatcherUpdateGaugeTimer = new DispatcherTimer();
+        // Feed 
+        private static bool fed = true;
+
+        // Alarms
+        private static bool alarmDetected = false;
+
+        // Gauges
+        private DispatcherTimer DispatcherUpdateGaugeTimer = new DispatcherTimer();     // Dispatcher timer for gauge update
+        private static int updateGaugesErrorCounter = 0;
 
         // Initializes a new instance of the XDocument class (represents an XML document)
         XDocument xdoc = new XDocument();
@@ -32,36 +45,55 @@ namespace SAP
         // Represents an object that renders audio and video to the display
         MediaElement mediaElement = new MediaElement();
 
-        // RPI GPIO Settings
-        private const int LightSwitch_PIN = 23;        
-        private GpioPin LightSwitchPin;
-
-        // Variables
-        private static bool twentyFourHrCbPreviousState = false;
-        private static bool twelveHrCbPreviousState = true;
-        private static bool broadcasted = false;
-        private static int updateGaugesErrorCounter = 0;
+        // Network
         private static int httpResponseErrorCounter = 0;
+
+        // RPI GPIO Settings (Pin Assignments)
+        private const int GrowLightSwitch_PIN = 24;
+        private const int TankLightSwitch_PIN = 23;
+        private const int WaterPumpSwitch_PIN = 26;
+        private GpioPin GrowLightSwitchPin;
+        private GpioPin TankLightSwitchPin;
+        private GpioPin WaterPumpSwitchPin;
+        
+        // Email
+        private const string SMTP_SERVER = "host165.hostmonster.com";
+        private const string STMP_USER = "smartaquaponics@bitsflipper.com";
+        private const string SMTP_PASSWORD = "sm@rtAquaponics";
+        private const int SMTP_PORT = 465;
+        private const bool SMTP_SSL = true;
+        private const string MAIL_RECIPIENT = "dennisonmra@gmail.com";
+        private static bool emailSuccessfullySent = false;
+
+        // Device
+        private const string DeviceName = "My Indoor Aquaponics System";
 
         public MainPage()
         {
-            this.InitializeComponent();             
+            this.InitializeComponent();
 
-            // Timer setup for the Digital Clock
-            DispatcherClockTimer.Interval = TimeSpan.FromSeconds(1);
+            // Set default fee button background
+            FeedBtn.Background = null;
+            FeedMeLbl.Visibility = Visibility.Collapsed;
+            AlarmLbl.Background = null;
+
+            // DispatcherTimer setup for the Date, Clock and Blinking Alarm Notification
+            DispatcherClockTimer = new DispatcherTimer();
             DispatcherClockTimer.Tick += DispatcherClockTimer_Tick;
+            DispatcherClockTimer.Interval = TimeSpan.FromSeconds(1);
             DispatcherClockTimer.Start();
 
-            // Timer setup for the Sensor Reading Update
+            // DispatcherTimer for aquaponics switches
+            DispatcherControlTimer = new DispatcherTimer();
+            DispatcherControlTimer.Tick += DispatcherControlTimer_Tick;
+            DispatcherControlTimer.Interval = TimeSpan.FromSeconds(1);
+
+            // DispatcherTimer setup for the Sensor Reading Updates
             DispatcherUpdateGaugeTimer.Interval = TimeSpan.FromSeconds(60);
             DispatcherUpdateGaugeTimer.Tick += DispatcherUpdateGaugeTimer_Tick;
             UpdateGauges();
-            DispatcherUpdateGaugeTimer.Start();
+            DispatcherUpdateGaugeTimer.Start();                       
 
-            // Timer setup for the Aquaponics Light
-            DispatcherLightTimer.Interval = TimeSpan.FromSeconds(60);
-            DispatcherLightTimer.Tick += DispatcherLightTimer_Tick;
-            
             // Update Location TextBlock                       
             if (GetLocationByIPAddress() == null || GetLocationByIPAddress() == "")
             {
@@ -77,11 +109,10 @@ namespace SAP
 
             // Initialize Status TextBlock
             this.SystemStatusTb.Text = "System Status: It's all good :)";
-                        
+
             InitGPIO();
 
-            if (LightSwitchPin != null)
-                DispatcherLightTimer.Start();                   
+            SendMail("Notification from " + DeviceName, "System started on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
         }        
 
         /// <summary>
@@ -89,10 +120,7 @@ namespace SAP
         /// Text to Speech method (Speak)
         /// </summary>
         private async void Speak(string text)
-        {
-            // Dispose SpeechRecognizer 
-            //await DisposeSpeechRecognizer();
-
+        {  
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {                
                 _Speak(text);                
@@ -122,63 +150,105 @@ namespace SAP
         }
 
         /// <summary>
-        /// check and switch ON/OFF the light
+        /// Check and switch ON/OFF the switches
         /// </summary>
-        private void DispatcherLightTimer_Tick(object sender, object e)
+        private void DispatcherControlTimer_Tick(object sender, object e)
         {
-            // Grow light/s
-            if (DateTime.Now.Hour > 6 && DateTime.Now.Hour < 20)
+            if (inputOutputDevice)
             {
-                // Lights need to be ON 
+                // Grow Lights are always ON by default
 
-                if (LightSwitchPin.Read() == GpioPinValue.Low)     // check if the relay is switched OFF
+                // Tank light/s
+                // ON from 7am to 8pm
+                if ((DateTime.Now.Hour > 6) && (DateTime.Now.Hour < 20))
                 {
-                    LightSwitchPin.Write(GpioPinValue.High);
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-on.png")), Stretch = Stretch.Fill };
-                    Speak("Lights ON");
-                    
+                    // Switch Grow Lights ON
+                    if (TankLightSwitchPin.Read() == GpioPinValue.Low)     // check if the relay is switched OFF
+                    {
+                        TankLightSwitchPin.Write(GpioPinValue.High);
+                        TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
+                        Speak("Tank Lights ON");
+                    }
+                    else
+                        TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
+
                 }
                 else
                 {
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-on.png")), Stretch = Stretch.Fill };
+                    if (TankLightSwitchPin.Read() == GpioPinValue.High)
+                    {
+                        TankLightSwitchPin.Write(GpioPinValue.Low);
+                        TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
+                        Speak("Tank Lights OFF");
+
+                    }
+                    else
+                        TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
                 }
             }
-            else
+
+            // Feed
+            if (((DateTime.Now.Hour > 5) && !fed) || ((DateTime.Now.Hour > 17) && !fed))
             {
-                if (LightSwitchPin.Read() == GpioPinValue.High)
-                {
-                    LightSwitchPin.Write(GpioPinValue.Low);
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-off.png")), Stretch = Stretch.Fill };
-                    Speak("Lights OFF");
-                    
-                }
-                else
-                {
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-off.png")), Stretch = Stretch.Fill };
-                }
-            }            
+                if(FeedBtn.Background == null)
+                    FeedBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Red-Fish.png")), Stretch = Stretch.Fill };
+                FeedMeLbl.Visibility = Visibility.Visible;
+                alarmDetected = true;
+                this.SystemStatusTb.Text = "Fish is hungry :(";                
+            }
+            if(fed)
+            {
+                FeedBtn.Background = null;
+                FeedMeLbl.Visibility = Visibility.Collapsed;
+                alarmDetected = false;
+            }                
+
+            if (((DateTime.Now.Hour == 6) && fed) || ((DateTime.Now.Hour == 18) && fed))
+                fed = false;
+
+            // Set interval to 60s
+            DispatcherControlTimer.Interval = TimeSpan.FromSeconds(6);
+        }
+
+        /// <summary>
+        /// Click after feeding to hide the Feed Me button and label
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FeedBtn_Click(object sender, RoutedEventArgs e)
+        {
+            this.SystemStatusTb.Text = "Manually fed the fish :)";
+            Speak("Fed the fish manually.");
+            SendMail("Notification from " + DeviceName, "Manually fed the fish on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
+            fed = true;
+            FeedBtn.Background = null;
+            FeedMeLbl.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
         /// Updates the current time and date display
         /// </summary>
         private void DispatcherClockTimer_Tick(object sender, object e)
-        {
-            TwentyFourHrCb.IsChecked = twentyFourHrCbPreviousState;
-            TwelveHrCb.IsChecked = twelveHrCbPreviousState;
-            
-            this.Lbl_Time.Text = (TwelveHrCb.IsChecked == true) ? DateTime.Now.ToString("hh:mm tt") : DateTime.Now.ToString("HH:mm ddd");
-            this.Lbl_Date.Text = (TwelveHrCb.IsChecked == true) ? DateTime.Now.ToString("dddd, MMMM dd, yyyy") : DateTime.Now.ToString("MMMM dd, yyyy");
-            if (DateTime.Now.Minute == 0 && broadcasted == false && DateTime.Now.Hour > 5)
+        {  
+            this.Lbl_Time.Text = DateTime.Now.ToString("hh:mm:ss tt");
+            this.Lbl_Date.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy");
+            if (DateTime.Now.Minute == 0)
             {
-                if (DateTime.Now.Hour <= 12)
-                    Speak("It's " + DateTime.Now.Hour + " o'clock!");
-                else
-                    Speak("It's " + (DateTime.Now.Hour - 12) + " o'clock!");
-                broadcasted = true;
+                if (broadcasted == false && DateTime.Now.Hour > 5)
+                {
+                    if (DateTime.Now.Hour <= 12)
+                        Speak("It's " + DateTime.Now.Hour + " o'clock!");
+                    else
+                        Speak("It's " + (DateTime.Now.Hour - 12) + " o'clock!");
+                    broadcasted = true;
+                }
             }
-            if (DateTime.Now.Minute == 1)           
-                broadcasted = false; 
+            else if (DateTime.Now.Minute == 1)
+                broadcasted = false;
+            if (alarmDetected)
+                AlarmLbl.Background = (AlarmLbl.Background == null) ? new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Red-LED.png")), Stretch = Stretch.Fill } : null;
+            else
+                AlarmLbl.Background = null;
         }        
 
         /// <summary>
@@ -240,43 +310,7 @@ namespace SAP
                 this.SystemStatusTb.Text = "Exception: Get Location By IP Address Error!";                
             }            
             return location.Trim();
-        }     
-
-        /// <summary>
-        /// 12-hr clock time keeping convention
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void TwelveHrCb_Checked(object sender, RoutedEventArgs e)
-        {
-            if(twelveHrCbPreviousState == false)
-                Speak("Changing time keeping convention to 12-hour clock.");
-            twelveHrCbPreviousState = true;
-            twentyFourHrCbPreviousState = false;
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                this.Lbl_Time.Text = DateTime.Now.ToString("hh:mm tt"); // 12hr format
-            });
-            
-        }
-
-        /// <summary>
-        /// 24-hr clock convention
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void TwentyFourHrCb_Checked(object sender, RoutedEventArgs e)
-        {
-            if(twentyFourHrCbPreviousState == false)
-                Speak("Changing time keeping convention to 24-hour clock.");
-            twentyFourHrCbPreviousState = true;
-            twelveHrCbPreviousState = false;
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                this.Lbl_Time.Text = DateTime.Now.ToString("HH:mm ddd"); // 24hr format
-            }); 
-        }       
-        
+        } 
 
         /// <summary>
         /// Initialize RPI GPIO Pin/s
@@ -287,52 +321,36 @@ namespace SAP
 
             // Check GPIO controller
             if (gpio == null)
-            {
-                LightSwitchPin = null;                
+            {                                
                 SystemStatusTb.Text = "System Status: There is no GPIO controller on this device";
                 Speak("There is no GPIO controller on this device.");
+                inputOutputDevice = false;
+                DispatcherControlTimer.Start();
                 return;
             }
 
-            LightSwitchPin = gpio.OpenPin(LightSwitch_PIN);
-            LightSwitchPin.Write(GpioPinValue.Low);
-            LightSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
-            
-            if (DateTime.Now.Hour > 6 && DateTime.Now.Hour < 20)
-            {
-                // Lights need to be ON 
-                // LightSwitchPin = GpioPinValue.High
-                if (LightSwitchPin.Read() == GpioPinValue.Low)     // check if the relay is switched ON
-                {
-                    LightSwitchPin.Write(GpioPinValue.High);
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-on.png")), Stretch = Stretch.Fill };
-                    Speak("Lights ON");
-                    
-                }
-                else
-                {
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-on.png")), Stretch = Stretch.Fill };
-                }
-            }
-            else
-            {
-                if (LightSwitchPin.Read() == GpioPinValue.High)
-                {
-                    LightSwitchPin.Write(GpioPinValue.Low);
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-off.png")), Stretch = Stretch.Fill };
-                    Speak("Lights OFF");                    
-                }
-                else
-                {
-                    LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-off.png")), Stretch = Stretch.Fill };
-                }
-            }
+            inputOutputDevice = true;
 
-            
-        }
+            // Configure TankLightSwitchPin
+            TankLightSwitchPin = gpio.OpenPin(TankLightSwitch_PIN);
+            TankLightSwitchPin.Write(GpioPinValue.Low);
+            TankLightSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
 
+            // Configure GrowLightSwitchPin
+            GrowLightSwitchPin = gpio.OpenPin(GrowLightSwitch_PIN);
+            //GrowLightSwitchPin.Write(GpioPinValue.Low);
+            //GrowLightSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
+
+            // Configure WaterPumpSwitchPin
+            WaterPumpSwitchPin = gpio.OpenPin(WaterPumpSwitch_PIN);
+            //WaterPumpSwitchPin.Write(GpioPinValue.Low);
+            //WaterPumpSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
+
+            DispatcherControlTimer.Start();
+        } 
+        
         /// <summary>
-        /// Updates the gauges
+        /// Asynchronously updates the gauges
         /// </summary>
         private async void DispatcherUpdateGaugeTimer_Tick(object sender, object e)
         {
@@ -340,7 +358,7 @@ namespace SAP
         }
 
         /// <summary>
-        /// 
+        /// Updates the gauges
         /// </summary>
         private void UpdateGauges()
         {
@@ -371,7 +389,12 @@ namespace SAP
                             Speak("Will try to establish connection again. If still unsuccessful, the system will be rebooted.");
                         if (httpResponseErrorCounter == 5)
                         {
+                            Stopwatch sw = new Stopwatch();
+                            sw.Start();
+                            emailSuccessfullySent = false;
                             Speak("Rebooting the system.");
+                            SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt") + "due to persistent network issue.");
+                            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000)) ;                            
                             Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));
                         }
                     }
@@ -399,64 +422,129 @@ namespace SAP
                     Speak("Will try to update again. If still unsuccessful, the system will be rebooted.");
                 if (updateGaugesErrorCounter == 5)
                 {
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    emailSuccessfullySent = false;
                     Speak("Rebooting the system.");
+                    SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt") + ". Unable to update gauges.");
+                    while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000)) ;
                     Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));
                 }
             }
         }
 
         /// <summary>
-        /// 
+        /// Manually turning ON/OFF the Tank Lights.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void LightBtn_Click(object sender, RoutedEventArgs e)
+        private void TankLightBtn_Click(object sender, RoutedEventArgs e)
         {            
-            if (LightSwitchPin.Read() == GpioPinValue.High)
+            if (TankLightSwitchPin.Read() == GpioPinValue.High)
             {
-                LightSwitchPin.Write(GpioPinValue.Low);
-                LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-off.png")), Stretch = Stretch.Fill };
-                Speak("Lights OFF");
+                TankLightSwitchPin.Write(GpioPinValue.Low);
+                TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
+                Speak("Tank Lights OFF");
             }
             else
             {
-                LightSwitchPin.Write(GpioPinValue.High);
-                LightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/switch-on.png")), Stretch = Stretch.Fill };
-                Speak("Lights ON");
+                TankLightSwitchPin.Write(GpioPinValue.High);
+                TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
+                Speak("Tank Lights ON");
             }
         }
 
         /// <summary>
-        /// 
+        /// Manually turning ON/OFF the Grow Lights.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GrowLightBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Speak("Grow Lights control is currently disabled.");
+        }
+
+        /// <summary>
+        /// Manually turning ON/OFF the water pump.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void WaterPumpBtn_Click(object sender, RoutedEventArgs e)
         {
-            Speak("Water pump automatic control is currently disabled.");            
+            Speak("Water pump control is currently disabled.");            
         }
 
         /// <summary>
-        /// 
+        /// Shuts down, then restarts the device
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Restart_Click(object sender, RoutedEventArgs e)
         {
-            Speak("Rebooting the system.");
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            emailSuccessfullySent = false;
+            Speak("Rebooting the system.");            
+            SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
+            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000));
             Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));		//Delay before restart after shutdown
 
         }
 
         /// <summary>
-        /// 
+        /// Shuts down the device without restarting it.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Shutdown_Click(object sender, RoutedEventArgs e)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            emailSuccessfullySent = false;
             Speak("Shutting down.");
-            Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Shutdown, TimeSpan.FromSeconds(1));		//Delay is not relevant to shutdown
+            SendMail("Notification from " + DeviceName, "System shutdown initiated on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
+            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000)) ;
+            Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Shutdown, TimeSpan.FromSeconds(1));		//Delay is not relevant to shutdown            
         }
+
+        /// <summary>
+        /// Send test email
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SendMail_Click(object sender, RoutedEventArgs e)
+        {
+            Speak("Sending test email to " + MAIL_RECIPIENT);
+            SendMail("Test Email Notification","Test email from " + GetPublicIPAddress() + " on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
+        }
+
+        /// <summary>
+        /// Asynchronously Send email
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="body"></param>
+        private async void SendMail(string subject, string body)
+        {
+            try
+            {
+                using (SmtpClient client = new SmtpClient(SMTP_SERVER, SMTP_PORT, SMTP_SSL, STMP_USER, SMTP_PASSWORD))
+                {
+                    EmailMessage emailMessage = new EmailMessage();
+
+                    emailMessage.To.Add(new EmailRecipient(MAIL_RECIPIENT));
+                    emailMessage.Subject = subject;
+                    emailMessage.Body = body;
+
+                    await client.SendMailAsync(emailMessage);
+                    emailSuccessfullySent = true;
+                    this.SystemStatusTb.Text = "Email was sent successfully!";
+                }
+            }
+            catch
+            {
+                emailSuccessfullySent = false;
+                this.SystemStatusTb.Text = "Failed to send email.";
+            }
+        }        
     }
 }
