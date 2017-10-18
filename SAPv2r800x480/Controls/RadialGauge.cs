@@ -639,7 +639,8 @@ namespace SAP.Controls
                 return;
             }
 
-            //radialGauge._root = container.GetVisual();            
+            //radialGauge._root = container.GetVisual(); 
+            radialGauge._root = null;
             radialGauge._root.Children.RemoveAll();
             radialGauge._compositor = radialGauge._root.Compositor;
 

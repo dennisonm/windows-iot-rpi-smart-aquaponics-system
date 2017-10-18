@@ -57,12 +57,12 @@ namespace SAP
         private GpioPin WaterPumpSwitchPin;
         
         // Email
-        private const string SMTP_SERVER = "host165.hostmonster.com";
-        private const string STMP_USER = "smartaquaponics@bitsflipper.com";
-        private const string SMTP_PASSWORD = "sm@rtAquaponics";
-        private const int SMTP_PORT = 465;
+        private const string SMTP_SERVER = "YOUR SMTP SERVER";
+        private const string STMP_USER = "YOUR EMAIL";
+        private const string SMTP_PASSWORD = "YOUR PASSWORD";
+        private const int SMTP_PORT = YOUR_SMTP_PORT;
         private const bool SMTP_SSL = true;
-        private const string MAIL_RECIPIENT = "dennisonmra@gmail.com";
+        private const string MAIL_RECIPIENT = "EMAIL RECIPIENT";
         private static bool emailSuccessfullySent = false;
 
         // Device
@@ -169,8 +169,8 @@ namespace SAP
                         TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
                         Speak("Tank Lights ON");
                     }
-                    else
-                        TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
+                    //else
+                        //TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
 
                 }
                 else
@@ -182,8 +182,8 @@ namespace SAP
                         Speak("Tank Lights OFF");
 
                     }
-                    else
-                        TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
+                    //else
+                        //TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
                 }
             }
 
