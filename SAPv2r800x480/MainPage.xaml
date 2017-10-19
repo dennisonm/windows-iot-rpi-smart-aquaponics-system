@@ -87,25 +87,14 @@
                     <ColumnDefinition/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Button Name="AlarmLbl"
-                            Content="" 
-                            Grid.Column="0"
-                            Margin="10,0,0,0"                            
-                            HorizontalAlignment="Left" 
-                            VerticalAlignment="Center"                     
-                            Width="40" Height="40">
-                    <Button.Background>
-                        <ImageBrush Stretch="Fill" ImageSource="Assets/Red-LED.png"/>
-                    </Button.Background>
-                </Button>
+                </Grid.ColumnDefinitions>                
                 <TextBlock x:Name="pageTitle" 
                            Grid.Column="1"
                            Margin="0,10,0,10" 
-                           FontSize="30" 
+                           FontSize="40" 
                            HorizontalAlignment="Center" 
                            Foreground="#EEEADCDC">
-                    Smart Aquaponics System V2.0
+                    Smart Aquaponics System
                 </TextBlock>
                 <Button Name="PowerBtn" 
                             Content="" 
@@ -138,7 +127,7 @@
                            HorizontalAlignment="Center">
                     April 07, 2005
                 </TextBlock>
-                <Grid VerticalAlignment="Center">
+                <Grid VerticalAlignment="Center" Height="120">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="50"/>
@@ -148,35 +137,31 @@
                     <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center" Height="120">
                         <TextBlock x:Name="GrowLightLbl"                             
                             Text="Grow Light" 
-                            Margin="10,13,0,0" 
-                            Foreground="#EEEADCDC"
-                            VerticalAlignment="Center" 
+                            Margin="0,10,0,0" 
+                            Foreground="#EEEADCDC"                            
                             HorizontalAlignment="Right"
-                            TextAlignment="Left"                       
+                            TextAlignment="Right"                                
                             FontSize="15" />
                         <TextBlock x:Name="TankLightLbl"                             
                             Text="Tank Light" 
-                            Margin="10,20,0,0" 
-                            Foreground="#EEEADCDC"
-                            VerticalAlignment="Center" 
+                            Margin="0,20,0,0" 
+                            Foreground="#EEEADCDC"                            
                             HorizontalAlignment="Right"
-                            TextAlignment="Left"                       
+                            TextAlignment="Right" 
                             FontSize="15" />
                         <TextBlock x:Name="WaterPumpLbl"                             
                             Text="Water Pump" 
-                            Margin="10,20,0,0" 
-                            Foreground="#EEEADCDC"
-                            VerticalAlignment="Center" 
+                            Margin="0,18,0,0" 
+                            Foreground="#EEEADCDC"                            
                             HorizontalAlignment="Right"
-                            TextAlignment="Left"                       
+                            TextAlignment="Right"  
                             FontSize="15" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Height="120">
                         <Button Name="GrowLightBtn" 
-                            Content="" 
-                            Margin="5,5,0,0" 
+                            Content=""
                             Click="GrowLightBtn_Click" 
-                            HorizontalAlignment="Left" 
+                            HorizontalAlignment="Center" 
                             VerticalAlignment="Center"                     
                             Width="40" Height="40">
                             <Button.Background>
@@ -185,9 +170,8 @@
                         </Button>
                         <Button Name="TankLightBtn" 
                             Content="" 
-                            Margin="5,0,0,0" 
                             Click="TankLightBtn_Click" 
-                            HorizontalAlignment="Left" 
+                            HorizontalAlignment="Center" 
                             VerticalAlignment="Center"                     
                             Width="40" Height="40">
                             <Button.Background>
@@ -196,9 +180,8 @@
                         </Button>
                         <Button Name="WaterPumpBtn" 
                             Content="" 
-                            Margin="5,0,0,0" 
                             Click="WaterPumpBtn_Click" 
-                            HorizontalAlignment="Left" 
+                            HorizontalAlignment="Center" 
                             VerticalAlignment="Center"                     
                             Width="40" Height="40">
                             <Button.Background>
@@ -394,20 +377,27 @@
         <!-- Footer -->
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-
+            <Image x:Name="SystemStatusIndicator"                             
+                            Grid.Column="0"
+                            Margin="10,0,0,0"                            
+                            HorizontalAlignment="Left" 
+                            VerticalAlignment="Center"                     
+                            Width="20" Height="20" 
+                            Source="Assets/Red-LED.png"/>
             <TextBlock x:Name="SystemStatusTb" 
-                       Grid.Column="0" 
+                       Grid.Column="1" 
                        HorizontalAlignment="Left" 
                        VerticalAlignment="Center" 
                        FontSize="15" 
                        Foreground="#EEEADCDC" 
                        Margin="10,10,10,10">
-                System Status:
+                Initializing
             </TextBlock>
-            <TextBlock Grid.Column="1" 
+            <TextBlock Grid.Column="2" 
                        HorizontalAlignment="Right" 
                        VerticalAlignment="Center" 
                        FontSize="15" 

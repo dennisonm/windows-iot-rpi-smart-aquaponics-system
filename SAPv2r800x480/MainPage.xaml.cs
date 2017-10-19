@@ -26,17 +26,24 @@ namespace SAP
 
         // Automatic Switches         
         DispatcherTimer DispatcherControlTimer;                                         // DispatcherTimer for aquaponics switches
-        private static bool inputOutputDevice = false;
+        private static bool gpioDevice = false;
+        private static bool firstTick = true;
 
-        // Feed 
+        // Feeder 
         private static bool fed = true;
+        private static bool fishIsHungry = false;
+        private static bool feedmelblvisibility = false;
 
         // Alarms
-        private static bool alarmDetected = false;
+        //private static bool alarmDetected = false;
+        BitmapImage GreenLED = new BitmapImage(new Uri("ms-appx:///Assets/Green-LED.png"));
+        BitmapImage RedLED = new BitmapImage(new Uri("ms-appx:///Assets/Red-LED.png"));
+        private static string statusLED = "red";
 
         // Gauges
         private DispatcherTimer DispatcherUpdateGaugeTimer = new DispatcherTimer();     // Dispatcher timer for gauge update
         private static int updateGaugesErrorCounter = 0;
+        private static bool sensorOutOfSpec = false;
 
         // Initializes a new instance of the XDocument class (represents an XML document)
         XDocument xdoc = new XDocument();
@@ -56,26 +63,28 @@ namespace SAP
         private GpioPin TankLightSwitchPin;
         private GpioPin WaterPumpSwitchPin;
         
-        // Email
-        private const string SMTP_SERVER = "YOUR SMTP SERVER";
-        private const string STMP_USER = "YOUR EMAIL";
-        private const string SMTP_PASSWORD = "YOUR PASSWORD";
-        private const int SMTP_PORT = YOUR_SMTP_PORT;
-        private const bool SMTP_SSL = true;
-        private const string MAIL_RECIPIENT = "EMAIL RECIPIENT";
+        // SMTP Setup
+        private const string SMTP_SERVER = SMTP.SMTP_SERVER;          // your SMTP server
+        private const string SMTP_USER = SMTP.SMTP_USER;              // your SMTP username
+        private const string SMTP_PASSWORD = SMTP.SMTP_PASSWORD;      // your SMTP password
+        private const string MAIL_RECIPIENT = SMTP.MAIL_RECIPIENT;    // mail recipient
+        private const bool SMTP_SSL = true;                           // send email over SSL
+        private const int SMTP_PORT = 465;                            // your SMTP port
         private static bool emailSuccessfullySent = false;
 
-        // Device
+        // Device Name
         private const string DeviceName = "My Indoor Aquaponics System";
 
         public MainPage()
         {
             this.InitializeComponent();
 
-            // Set default fee button background
+            // Initialize Status TextBlock            
+            this.SystemStatusTb.Text = "Initializing...";            
+
+            // Set default Fee Me button status
             FeedBtn.Background = null;
-            FeedMeLbl.Visibility = Visibility.Collapsed;
-            AlarmLbl.Background = null;
+            FeedMeLbl.Visibility = Visibility.Collapsed;            
 
             // DispatcherTimer setup for the Date, Clock and Blinking Alarm Notification
             DispatcherClockTimer = new DispatcherTimer();
@@ -107,9 +116,7 @@ namespace SAP
             else
                 this.Lbl_Location.Text = GetLocationByIPAddress();
 
-            // Initialize Status TextBlock
-            this.SystemStatusTb.Text = "System Status: It's all good :)";
-
+            // Initialize GPIO
             InitGPIO();
 
             SendMail("Notification from " + DeviceName, "System started on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
@@ -132,7 +139,7 @@ namespace SAP
         /// Text to Speech method (Speak)
         /// </summary>
         private async void _Speak(string text)
-        {
+        {  
             // Stops and resets media 
             mediaElement.Stop();
 
@@ -154,24 +161,27 @@ namespace SAP
         /// </summary>
         private void DispatcherControlTimer_Tick(object sender, object e)
         {
-            if (inputOutputDevice)
+            if (gpioDevice)
             {
-                // Grow Lights are always ON by default
+                // Grow Lights are always ON by default                
+                if (GrowLightSwitchPin.Read() == GpioPinValue.Low)
+                {
+                    GrowLightSwitchPin.Write(GpioPinValue.High);
+                    GrowLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
+                    //Speak("Grow Lights ON");
+                }
 
-                // Tank light/s
+                // Tank lights
                 // ON from 7am to 8pm
                 if ((DateTime.Now.Hour > 6) && (DateTime.Now.Hour < 20))
                 {
                     // Switch Grow Lights ON
-                    if (TankLightSwitchPin.Read() == GpioPinValue.Low)     // check if the relay is switched OFF
+                    if (TankLightSwitchPin.Read() == GpioPinValue.Low)     
                     {
                         TankLightSwitchPin.Write(GpioPinValue.High);
                         TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
                         Speak("Tank Lights ON");
-                    }
-                    //else
-                        //TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
-
+                    }                    
                 }
                 else
                 {
@@ -182,32 +192,42 @@ namespace SAP
                         Speak("Tank Lights OFF");
 
                     }
-                    //else
-                        //TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
+                }
+
+                // Pumps are always ON by default
+                if (WaterPumpSwitchPin.Read() == GpioPinValue.Low)
+                {
+                    WaterPumpSwitchPin.Write(GpioPinValue.High);
+                    WaterPumpBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
+                    //Speak("Water Pumps ON");
                 }
             }
 
-            // Feed
+            // Manual Feeding
             if (((DateTime.Now.Hour > 5) && !fed) || ((DateTime.Now.Hour > 17) && !fed))
             {
                 if(FeedBtn.Background == null)
                     FeedBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Red-Fish.png")), Stretch = Stretch.Fill };
                 FeedMeLbl.Visibility = Visibility.Visible;
-                alarmDetected = true;
+                fishIsHungry = true;
                 this.SystemStatusTb.Text = "Fish is hungry :(";                
             }
             if(fed)
             {
                 FeedBtn.Background = null;
                 FeedMeLbl.Visibility = Visibility.Collapsed;
-                alarmDetected = false;
+                fishIsHungry = false;
             }                
 
-            if (((DateTime.Now.Hour == 6) && fed) || ((DateTime.Now.Hour == 18) && fed))
-                fed = false;
+            if (((DateTime.Now.Hour == 6) && fed) || ((DateTime.Now.Hour == 18) && fed))            
+                fed = false; 
 
-            // Set interval to 60s
-            DispatcherControlTimer.Interval = TimeSpan.FromSeconds(6);
+            // Set interval to 60s after the first tick
+            if (firstTick)
+            {
+                DispatcherControlTimer.Interval = TimeSpan.FromSeconds(60);
+                firstTick = false;
+            }                
         }
 
         /// <summary>
@@ -217,12 +237,12 @@ namespace SAP
         /// <param name="e"></param>
         private void FeedBtn_Click(object sender, RoutedEventArgs e)
         {
-            this.SystemStatusTb.Text = "Manually fed the fish :)";
-            Speak("Fed the fish manually.");
+            this.SystemStatusTb.Text = "Manually fed the fish :)";            
             SendMail("Notification from " + DeviceName, "Manually fed the fish on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
             fed = true;
             FeedBtn.Background = null;
             FeedMeLbl.Visibility = Visibility.Collapsed;
+            feedmelblvisibility = false;
         }
 
         /// <summary>
@@ -245,10 +265,36 @@ namespace SAP
             }
             else if (DateTime.Now.Minute == 1)
                 broadcasted = false;
-            if (alarmDetected)
-                AlarmLbl.Background = (AlarmLbl.Background == null) ? new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Red-LED.png")), Stretch = Stretch.Fill } : null;
+
+           if (fishIsHungry || sensorOutOfSpec)
+           {
+                if (statusLED == "green")
+                {
+                    SystemStatusIndicator.Source = RedLED;
+                    statusLED = "red";
+                }
+                if (fishIsHungry)
+                {
+                    FeedMeLbl.Visibility = (feedmelblvisibility == true) ? Visibility.Collapsed : Visibility.Visible;
+                    feedmelblvisibility = false;
+                }                    
+                else
+                {
+                    if (feedmelblvisibility)
+                    {
+                        FeedMeLbl.Visibility = Visibility.Collapsed;
+                        feedmelblvisibility = false;
+                    }
+                }
+            }
             else
-                AlarmLbl.Background = null;
+            {
+                if (statusLED == "red")
+                {
+                    SystemStatusIndicator.Source = GreenLED;
+                    statusLED = "green";
+                }
+            }
         }        
 
         /// <summary>
@@ -313,7 +359,7 @@ namespace SAP
         } 
 
         /// <summary>
-        /// Initialize RPI GPIO Pin/s
+        /// Initialize RPI GPIO Pins
         /// </summary>
         private void InitGPIO()
         {
@@ -322,14 +368,14 @@ namespace SAP
             // Check GPIO controller
             if (gpio == null)
             {                                
-                SystemStatusTb.Text = "System Status: There is no GPIO controller on this device";
+                SystemStatusTb.Text = "Status: There is no GPIO controller on this device";
                 Speak("There is no GPIO controller on this device.");
-                inputOutputDevice = false;
+                gpioDevice = false;
                 DispatcherControlTimer.Start();
                 return;
             }
 
-            inputOutputDevice = true;
+            gpioDevice = true;            
 
             // Configure TankLightSwitchPin
             TankLightSwitchPin = gpio.OpenPin(TankLightSwitch_PIN);
@@ -338,13 +384,13 @@ namespace SAP
 
             // Configure GrowLightSwitchPin
             GrowLightSwitchPin = gpio.OpenPin(GrowLightSwitch_PIN);
-            //GrowLightSwitchPin.Write(GpioPinValue.Low);
-            //GrowLightSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
+            GrowLightSwitchPin.Write(GpioPinValue.Low);
+            GrowLightSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
 
             // Configure WaterPumpSwitchPin
             WaterPumpSwitchPin = gpio.OpenPin(WaterPumpSwitch_PIN);
-            //WaterPumpSwitchPin.Write(GpioPinValue.Low);
-            //WaterPumpSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
+            WaterPumpSwitchPin.Write(GpioPinValue.Low);
+            WaterPumpSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
 
             DispatcherControlTimer.Start();
         } 
@@ -389,12 +435,12 @@ namespace SAP
                             Speak("Will try to establish connection again. If still unsuccessful, the system will be rebooted.");
                         if (httpResponseErrorCounter == 5)
                         {
+                            Speak("Rebooting the system.");
+                            emailSuccessfullySent = false;
+                            SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt") + "due to persistent network issue.");
                             Stopwatch sw = new Stopwatch();
                             sw.Start();
-                            emailSuccessfullySent = false;
-                            Speak("Rebooting the system.");
-                            SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt") + "due to persistent network issue.");
-                            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000)) ;                            
+                            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds < 5000)) ;                            
                             Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));
                         }
                     }
@@ -422,12 +468,12 @@ namespace SAP
                     Speak("Will try to update again. If still unsuccessful, the system will be rebooted.");
                 if (updateGaugesErrorCounter == 5)
                 {
+                    Speak("Rebooting the system.");
+                    emailSuccessfullySent = false;
+                    SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt") + ". Unable to update gauges.");
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
-                    emailSuccessfullySent = false;
-                    Speak("Rebooting the system.");
-                    SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt") + ". Unable to update gauges.");
-                    while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000)) ;
+                    while (!emailSuccessfullySent && (sw.ElapsedMilliseconds < 5000)) ;
                     Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));
                 }
             }
@@ -439,19 +485,28 @@ namespace SAP
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void TankLightBtn_Click(object sender, RoutedEventArgs e)
-        {            
-            if (TankLightSwitchPin.Read() == GpioPinValue.High)
+        {
+            if (gpioDevice)
             {
-                TankLightSwitchPin.Write(GpioPinValue.Low);
-                TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
-                Speak("Tank Lights OFF");
+                if (TankLightSwitchPin.Read() == GpioPinValue.High)
+                {
+                    TankLightSwitchPin.Write(GpioPinValue.Low);
+                    TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-Off.png")), Stretch = Stretch.Fill };
+                    Speak("Tank Lights OFF");
+                }
+                else
+                {
+                    TankLightSwitchPin.Write(GpioPinValue.High);
+                    TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
+                    Speak("Tank Lights ON");
+                }
             }
             else
             {
-                TankLightSwitchPin.Write(GpioPinValue.High);
-                TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
-                Speak("Tank Lights ON");
+                SystemStatusTb.Text = "Status: There is no GPIO controller on this device";
+                Speak("There is no GPIO controller on this device.");
             }
+
         }
 
         /// <summary>
@@ -480,15 +535,14 @@ namespace SAP
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Restart_Click(object sender, RoutedEventArgs e)
-        {
+        {            
+            Speak("Rebooting the system.");            
+            emailSuccessfullySent = false;
+            SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            emailSuccessfullySent = false;
-            Speak("Rebooting the system.");            
-            SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
-            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000));
+            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds < 5000)) ;
             Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));		//Delay before restart after shutdown
-
         }
 
         /// <summary>
@@ -498,12 +552,12 @@ namespace SAP
         /// <param name="e"></param>
         private void Shutdown_Click(object sender, RoutedEventArgs e)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            emailSuccessfullySent = false;
             Speak("Shutting down.");
+            emailSuccessfullySent = false;
             SendMail("Notification from " + DeviceName, "System shutdown initiated on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
-            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds > 5000)) ;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();            
+            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds < 5000)) ;
             Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Shutdown, TimeSpan.FromSeconds(1));		//Delay is not relevant to shutdown            
         }
 
@@ -527,7 +581,7 @@ namespace SAP
         {
             try
             {
-                using (SmtpClient client = new SmtpClient(SMTP_SERVER, SMTP_PORT, SMTP_SSL, STMP_USER, SMTP_PASSWORD))
+                using (SmtpClient client = new SmtpClient(SMTP_SERVER, SMTP_PORT, SMTP_SSL, SMTP_USER, SMTP_PASSWORD))
                 {
                     EmailMessage emailMessage = new EmailMessage();
 
