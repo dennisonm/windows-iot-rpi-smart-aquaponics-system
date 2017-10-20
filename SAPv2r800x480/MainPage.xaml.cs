@@ -209,8 +209,7 @@ namespace SAP
                 if(FeedBtn.Background == null)
                     FeedBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Red-Fish.png")), Stretch = Stretch.Fill };
                 FeedMeLbl.Visibility = Visibility.Visible;
-                fishIsHungry = true;
-                this.SystemStatusTb.Text = "Fish is hungry :(";                
+                fishIsHungry = true;                                
             }
             if(fed)
             {
@@ -276,7 +275,7 @@ namespace SAP
                 if (fishIsHungry)
                 {
                     FeedMeLbl.Visibility = (feedmelblvisibility == true) ? Visibility.Collapsed : Visibility.Visible;
-                    feedmelblvisibility = false;
+                    feedmelblvisibility = !feedmelblvisibility;
                 }                    
                 else
                 {
