@@ -14,19 +14,22 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.Email;
 
-using LightBuzz.SMTP; 
+using LightBuzz.SMTP;
+using Windows.UI.Popups;
+using System.Reflection;
 
 namespace SAP
 {
     public sealed partial class MainPage : Page
     {
         // Clock                
-        DispatcherTimer DispatcherClockTimer;                                           // DispatcherTimer for the clock 
-        private static bool broadcasted = false;
+        private DispatcherTimer DispatcherClockTimer;                                   // DispatcherTimer for the clock 
+        private TimeZoneInfo remoteTimeZone;
+        private static bool broadcasted = false;                                        // flag to avoid broadcasting time indefinitely
 
         // Automatic Switches         
-        DispatcherTimer DispatcherControlTimer;                                         // DispatcherTimer for aquaponics switches
-        private static bool gpioDevice = false;
+        private DispatcherTimer DispatcherControlTimer;                                 // DispatcherTimer for aquaponics switches
+        private static bool gpioDevice = false;                                         
         private static bool firstTick = true;
 
         // Feeder 
@@ -35,9 +38,8 @@ namespace SAP
         private static bool feedmelblvisibility = false;
 
         // Alarms
-        //private static bool alarmDetected = false;
-        BitmapImage GreenLED = new BitmapImage(new Uri("ms-appx:///Assets/Green-LED.png"));
-        BitmapImage RedLED = new BitmapImage(new Uri("ms-appx:///Assets/Red-LED.png"));
+        private BitmapImage GreenLED = new BitmapImage(new Uri("ms-appx:///Assets/Green-LED.png"));
+        private BitmapImage RedLED = new BitmapImage(new Uri("ms-appx:///Assets/Red-LED.png"));
         private static string statusLED = "red";
 
         // Gauges
@@ -46,11 +48,11 @@ namespace SAP
         private static bool sensorOutOfSpec = false;
 
         // Initializes a new instance of the XDocument class (represents an XML document)
-        XDocument xdoc = new XDocument();
+        private XDocument xdoc = new XDocument();
 
         // Instantiate a new instance of MediaElement
         // Represents an object that renders audio and video to the display
-        MediaElement mediaElement = new MediaElement();
+        private MediaElement mediaElement = new MediaElement();
 
         // Network
         private static int httpResponseErrorCounter = 0;
@@ -62,7 +64,7 @@ namespace SAP
         private GpioPin GrowLightSwitchPin;
         private GpioPin TankLightSwitchPin;
         private GpioPin WaterPumpSwitchPin;
-        
+
         // SMTP Setup
         private const string SMTP_SERVER = SMTP.SMTP_SERVER;          // your SMTP server
         private const string SMTP_USER = SMTP.SMTP_USER;              // your SMTP username
@@ -80,11 +82,11 @@ namespace SAP
             this.InitializeComponent();
 
             // Initialize Status TextBlock            
-            this.SystemStatusTb.Text = "Initializing...";            
+            this.SystemStatusTb.Text = "Initializing...";
 
             // Set default Fee Me button status
             FeedBtn.Background = null;
-            FeedMeLbl.Visibility = Visibility.Collapsed;            
+            FeedMeLbl.Visibility = Visibility.Collapsed;
 
             // DispatcherTimer setup for the Date, Clock and Blinking Alarm Notification
             DispatcherClockTimer = new DispatcherTimer();
@@ -101,37 +103,54 @@ namespace SAP
             DispatcherUpdateGaugeTimer.Interval = TimeSpan.FromSeconds(60);
             DispatcherUpdateGaugeTimer.Tick += DispatcherUpdateGaugeTimer_Tick;
             UpdateGauges();
-            DispatcherUpdateGaugeTimer.Start();                       
+            DispatcherUpdateGaugeTimer.Start();
 
             // Update Location TextBlock                       
             if (GetLocationByIPAddress() == null || GetLocationByIPAddress() == "")
             {
-                this.SystemStatusTb.Text = "System Status: Error getting location by IP Address!";
-                this.Lbl_Location.Text = "Singapore, Singapore";
+                this.SystemStatusTb.Text = "Error getting location by IP Address!";
+                this.LocalLocationLbl.Text = "Singapore, Singapore";
+                this.RemoteLocationLbl.Text = "Sydney";
                 Speak(
                     "I am having problem getting your location." +
                     " " +
                     "Please check your network.");
             }
             else
-                this.Lbl_Location.Text = GetLocationByIPAddress();
+                this.LocalLocationLbl.Text = GetLocationByIPAddress();
+
+            if (GetLocationByIPAddress().Contains("Singapore"))
+            {
+                remoteTimeZone = TimeZoneInfo.FindSystemTimeZoneById("AUS Eastern Standard Time");
+                RemoteLocationLbl.Text = "Sydney";
+            }
+            else if (GetLocationByIPAddress().Contains("Australia"))
+            {
+                remoteTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time");
+                RemoteLocationLbl.Text = "Cebu";
+            }
+            else
+            {
+                remoteTimeZone = TimeZoneInfo.FindSystemTimeZoneById("AUS Eastern Standard Time");
+                RemoteLocationLbl.Text = "Sydney";
+            }
 
             // Initialize GPIO
             InitGPIO();
 
             SendMail("Notification from " + DeviceName, "System started on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
-        }        
+        }
 
         /// <summary>
         /// Speech Synthesizer
         /// Text to Speech method (Speak)
         /// </summary>
         private async void Speak(string text)
-        {  
+        {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {                
-                _Speak(text);                
-            });            
+            {
+                _Speak(text);
+            });
         }
 
         /// <summary>
@@ -139,7 +158,7 @@ namespace SAP
         /// Text to Speech method (Speak)
         /// </summary>
         private async void _Speak(string text)
-        {  
+        {
             // Stops and resets media 
             mediaElement.Stop();
 
@@ -148,9 +167,9 @@ namespace SAP
 
             // Generate the audio stream from plain text
             SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync(text);
-			
+
             // Send the stream to the media object
-            mediaElement.SetSource(stream, stream.ContentType);                       
+            mediaElement.SetSource(stream, stream.ContentType);
 
             // Disposes the SpeechSynthesizer object and releases resources used 
             synth.Dispose();
@@ -176,12 +195,12 @@ namespace SAP
                 if ((DateTime.Now.Hour > 6) && (DateTime.Now.Hour < 20))
                 {
                     // Switch Grow Lights ON
-                    if (TankLightSwitchPin.Read() == GpioPinValue.Low)     
+                    if (TankLightSwitchPin.Read() == GpioPinValue.Low)
                     {
                         TankLightSwitchPin.Write(GpioPinValue.High);
                         TankLightBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Switch-On.png")), Stretch = Stretch.Fill };
                         Speak("Tank Lights ON");
-                    }                    
+                    }
                 }
                 else
                 {
@@ -206,27 +225,27 @@ namespace SAP
             // Manual Feeding
             if (((DateTime.Now.Hour > 5) && !fed) || ((DateTime.Now.Hour > 17) && !fed))
             {
-                if(FeedBtn.Background == null)
+                if (FeedBtn.Background == null)
                     FeedBtn.Background = new ImageBrush { ImageSource = new BitmapImage(new Uri(this.BaseUri, "Assets/Red-Fish.png")), Stretch = Stretch.Fill };
                 FeedMeLbl.Visibility = Visibility.Visible;
-                fishIsHungry = true;                                
+                fishIsHungry = true;
             }
-            if(fed)
+            if (fed)
             {
                 FeedBtn.Background = null;
                 FeedMeLbl.Visibility = Visibility.Collapsed;
                 fishIsHungry = false;
-            }                
+            }
 
-            if (((DateTime.Now.Hour == 6) && fed) || ((DateTime.Now.Hour == 18) && fed))            
-                fed = false; 
+            if (((DateTime.Now.Hour == 6) && fed) || ((DateTime.Now.Hour == 18) && fed))
+                fed = false;
 
             // Set interval to 60s after the first tick
             if (firstTick)
             {
                 DispatcherControlTimer.Interval = TimeSpan.FromSeconds(60);
                 firstTick = false;
-            }                
+            }
         }
 
         /// <summary>
@@ -236,7 +255,7 @@ namespace SAP
         /// <param name="e"></param>
         private void FeedBtn_Click(object sender, RoutedEventArgs e)
         {
-            this.SystemStatusTb.Text = "Manually fed the fish :)";            
+            this.SystemStatusTb.Text = "Manually fed the fish :)";
             SendMail("Notification from " + DeviceName, "Manually fed the fish on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
             fed = true;
             FeedBtn.Background = null;
@@ -248,9 +267,14 @@ namespace SAP
         /// Updates the current time and date display
         /// </summary>
         private void DispatcherClockTimer_Tick(object sender, object e)
-        {  
-            this.Lbl_Time.Text = DateTime.Now.ToString("hh:mm:ss tt");
-            this.Lbl_Date.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy");
+        {
+            // Display
+            this.LocalTimeLbl.Text = DateTime.Now.ToString("h:mm");
+            this.LocalDateLbl.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy");
+            this.LocalTimeSecLbl.Text = DateTime.Now.ToString("ss");
+            this.LocalTimeAMPMLbl.Text = (DateTime.Now.Hour >= 12) ? "PM" : "AM";
+
+            // Broadcast time every hour
             if (DateTime.Now.Minute == 0)
             {
                 if (broadcasted == false && DateTime.Now.Hour > 5)
@@ -259,14 +283,18 @@ namespace SAP
                         Speak("It's " + DateTime.Now.Hour + " o'clock!");
                     else
                         Speak("It's " + (DateTime.Now.Hour - 12) + " o'clock!");
-                    broadcasted = true;
+                    broadcasted = true; // flag to avoid broadcasting the time over and over again
                 }
             }
             else if (DateTime.Now.Minute == 1)
-                broadcasted = false;
+                broadcasted = false;    // reset flag
 
-           if (fishIsHungry || sensorOutOfSpec)
-           {
+            DateTime remoteTime = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.Local, remoteTimeZone);
+            this.RemoteTimeLbl.Text = Convert.ToString(remoteTime.ToString("h:mm tt"));
+            this.RemoteDateLbl.Text = Convert.ToString(remoteTime.ToString("ddd, MMM dd"));
+
+            if (fishIsHungry || sensorOutOfSpec)
+            {
                 if (statusLED == "green")
                 {
                     SystemStatusIndicator.Source = RedLED;
@@ -274,16 +302,13 @@ namespace SAP
                 }
                 if (fishIsHungry)
                 {
-                    FeedMeLbl.Visibility = (feedmelblvisibility == true) ? Visibility.Collapsed : Visibility.Visible;
+                    FeedMeLbl.Text = (feedmelblvisibility == true) ? "" : "Feed Me!";
                     feedmelblvisibility = !feedmelblvisibility;
-                }                    
+                }
                 else
                 {
-                    if (feedmelblvisibility)
-                    {
-                        FeedMeLbl.Visibility = Visibility.Collapsed;
-                        feedmelblvisibility = false;
-                    }
+                    FeedMeLbl.Text = "";
+                    feedmelblvisibility = false;
                 }
             }
             else
@@ -294,7 +319,7 @@ namespace SAP
                     statusLED = "green";
                 }
             }
-        }        
+        }
 
         /// <summary>
         /// Returns the private IP address of the device
@@ -321,18 +346,18 @@ namespace SAP
             try
             {
                 string uri = "http://whatismyip.bitsflipper.com/";
-                
+
                 using (var client = new HttpClient())
                 {
                     var result = client.GetAsync(uri).Result.Content.ReadAsStringAsync().Result;
                     ip = result.Split(':')[1].Split('<')[0];
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
-                this.SystemStatusTb.Text = "Exception: Get Public Address Error!";                
-            }            
-            return ip;            
+                this.SystemStatusTb.Text = "Exception: Get Public Address Error!";
+            }
+            return ip;
         }
 
         /// <summary>
@@ -350,12 +375,12 @@ namespace SAP
                     location = result.Split(':')[1].Split('<')[0];
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
-                this.SystemStatusTb.Text = "Exception: Get Location By IP Address Error!";                
-            }            
+                this.SystemStatusTb.Text = "Exception: Get Location By IP Address Error!";
+            }
             return location.Trim();
-        } 
+        }
 
         /// <summary>
         /// Initialize RPI GPIO Pins
@@ -366,7 +391,7 @@ namespace SAP
 
             // Check GPIO controller
             if (gpio == null)
-            {                                
+            {
                 SystemStatusTb.Text = "Status: There is no GPIO controller on this device";
                 Speak("There is no GPIO controller on this device.");
                 gpioDevice = false;
@@ -374,7 +399,7 @@ namespace SAP
                 return;
             }
 
-            gpioDevice = true;            
+            gpioDevice = true;
 
             // Configure TankLightSwitchPin
             TankLightSwitchPin = gpio.OpenPin(TankLightSwitch_PIN);
@@ -392,8 +417,8 @@ namespace SAP
             WaterPumpSwitchPin.SetDriveMode(GpioPinDriveMode.Output);
 
             DispatcherControlTimer.Start();
-        } 
-        
+        }
+
         /// <summary>
         /// Asynchronously updates the gauges
         /// </summary>
@@ -439,7 +464,7 @@ namespace SAP
                             SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt") + "due to persistent network issue.");
                             Stopwatch sw = new Stopwatch();
                             sw.Start();
-                            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds < 5000)) ;                            
+                            while (!emailSuccessfullySent && (sw.ElapsedMilliseconds < 5000)) ;
                             Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Restart, TimeSpan.FromSeconds(1));
                         }
                     }
@@ -463,7 +488,7 @@ namespace SAP
                 ++updateGaugesErrorCounter;
                 this.SystemStatusTb.Text = "Exception: Update Gauges Error!";
                 Speak("Unable to update Gauges. Please check the server or your internet connection.");
-                if (updateGaugesErrorCounter == 4)                    
+                if (updateGaugesErrorCounter == 4)
                     Speak("Will try to update again. If still unsuccessful, the system will be rebooted.");
                 if (updateGaugesErrorCounter == 5)
                 {
@@ -525,7 +550,7 @@ namespace SAP
         /// <param name="e"></param>
         private void WaterPumpBtn_Click(object sender, RoutedEventArgs e)
         {
-            Speak("Water pump control is currently disabled.");            
+            Speak("Water pump control is currently disabled.");
         }
 
         /// <summary>
@@ -534,8 +559,8 @@ namespace SAP
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Restart_Click(object sender, RoutedEventArgs e)
-        {            
-            Speak("Rebooting the system.");            
+        {
+            Speak("Rebooting the system.");
             emailSuccessfullySent = false;
             SendMail("Notification from " + DeviceName, "System restarted on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
             Stopwatch sw = new Stopwatch();
@@ -555,7 +580,7 @@ namespace SAP
             emailSuccessfullySent = false;
             SendMail("Notification from " + DeviceName, "System shutdown initiated on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
             Stopwatch sw = new Stopwatch();
-            sw.Start();            
+            sw.Start();
             while (!emailSuccessfullySent && (sw.ElapsedMilliseconds < 5000)) ;
             Windows.System.ShutdownManager.BeginShutdown(Windows.System.ShutdownKind.Shutdown, TimeSpan.FromSeconds(1));		//Delay is not relevant to shutdown            
         }
@@ -568,7 +593,7 @@ namespace SAP
         private void SendMail_Click(object sender, RoutedEventArgs e)
         {
             Speak("Sending test email to " + MAIL_RECIPIENT);
-            SendMail("Test Email Notification","Test email from " + GetPublicIPAddress() + " on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
+            SendMail("Test Email Notification", "Test email from " + GetPublicIPAddress() + " on " + DateTime.Now.ToString("MMMM dd, yyyy") + ", at " + DateTime.Now.ToString("hh:mm tt"));
         }
 
         /// <summary>
@@ -598,6 +623,23 @@ namespace SAP
                 emailSuccessfullySent = false;
                 this.SystemStatusTb.Text = "Failed to send email.";
             }
-        }        
+        }
+
+        /// <summary>
+        /// About the app
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="body"></param>
+        private async void About_Click(object sender, RoutedEventArgs e)
+        {
+            ContentDialog about = new ContentDialog()
+            {
+                Title = "About SAP",
+                Content = "Smart Aquaponics System Prototype\n" + "Developed by Myron Richard Dennison",
+                CloseButtonText = "Close"
+            };
+
+            await about.ShowAsync();            
+        }
     }
 }

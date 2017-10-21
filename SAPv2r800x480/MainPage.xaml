@@ -107,7 +107,8 @@
                         <MenuFlyout>
                             <MenuFlyoutItem Text="Restart" Click="Restart_Click"/>
                             <MenuFlyoutItem Text="Shutdown" Click="Shutdown_Click"/>
-                            <MenuFlyoutItem Text="Send Test Email" Click="SendMail_Click"/>
+                            <!--MenuFlyoutItem Text="Send Test Email" Click="SendMail_Click"/-->
+                            <MenuFlyoutItem Text="About SAP" Click="About_Click"/>
                         </MenuFlyout>
                     </Button.Flyout>
                     <Button.Background>
@@ -120,7 +121,7 @@
         <!-- Date, Time, Lights/Pump Switches -->
         <Grid Grid.Row="1">
             <StackPanel>
-                <TextBlock x:Name="Lbl_Date" 
+                <TextBlock x:Name="LocalDateLbl" 
                            Foreground="#EE35EA0D" 
                            FontSize="30" 
                            VerticalAlignment="Center"
@@ -131,8 +132,10 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="550"/>
+                        <ColumnDefinition Width="350"/>
                         <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="80"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center" Height="auto">
                         <TextBlock x:Name="GrowLightLbl"                             
@@ -157,7 +160,7 @@
                             TextAlignment="Right"  
                             FontSize="15" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Height="auto" Margin="0,10,0,0">
+                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0">
                         <Button Name="GrowLightBtn" 
                             Content=""
                             Click="GrowLightBtn_Click" 
@@ -189,16 +192,52 @@
                             </Button.Background>
                         </Button>
                     </StackPanel>
-                    <TextBlock x:Name="Lbl_Time" 
+                    <TextBlock x:Name="LocalTimeLbl" 
                                Grid.Column="2"
                                Foreground="#EEEADCDC" 
-                               FontSize="100"
-                               Margin="0,0,0,0"
+                               FontSize="140"
+                               Margin="1,-41,-0.6,-25"
+                               Width="350"
                                VerticalAlignment="Center"
+                               TextAlignment="Center"
                                HorizontalAlignment="Center">
-                            01:27:00 AM
-                    </TextBlock>            
+                            01:27
+                    </TextBlock>
                     <StackPanel Grid.Column="3" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="LocalTimeAMPMLbl"                             
+                            Text="AM" 
+                            Margin="0,0,0,0" 
+                            Foreground="#EEEADCDC"                            
+                            HorizontalAlignment="Center"                                                            
+                            FontSize="40" />
+                        <TextBlock x:Name="LocalTimeSecLbl"                             
+                            Text="00" 
+                            Margin="0,0,0,0" 
+                            Foreground="#EEEADCDC"                            
+                            HorizontalAlignment="Center"                                                         
+                            FontSize="50" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="4" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="RemoteDateLbl"                             
+                            Text="Thu, Apr 7" 
+                            Margin="0,0,0,0" 
+                            Foreground="#EE35EA0D"                            
+                            HorizontalAlignment="Center"                                                            
+                            FontSize="15" />
+                        <TextBlock x:Name="RemoteTimeLbl"                             
+                            Text="02:17 AM" 
+                            Margin="0,0,0,0" 
+                            Foreground="#EEEADCDC"                            
+                            HorizontalAlignment="Center"                                                         
+                            FontSize="28" />
+                        <TextBlock x:Name="RemoteLocationLbl"                             
+                            Text="Sydney" 
+                            Margin="0,0,0,0" 
+                            Foreground="#EE35EA0D"                            
+                            HorizontalAlignment="Center"                                                         
+                            FontSize="15" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="5" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Button Name="FeedBtn"
                                 Content=""                                 
                                 Margin="0,15,0,0" 
@@ -220,7 +259,7 @@
                             FontSize="15" />
                     </StackPanel>
                 </Grid>
-                <TextBlock x:Name="Lbl_Location" 
+                <TextBlock x:Name="LocalLocationLbl" 
                         Foreground="#EE35EA0D" 
                         FontSize="30" 
                         VerticalAlignment="Center"
