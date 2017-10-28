@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,8 +16,7 @@ using Windows.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.Email;
 
 using LightBuzz.SMTP;
-using Windows.UI.Popups;
-using System.Reflection;
+
 
 namespace SAP
 {
@@ -191,8 +191,8 @@ namespace SAP
                 }
 
                 // Tank lights
-                // ON from 7am to 8pm
-                if ((DateTime.Now.Hour > 6) && (DateTime.Now.Hour < 20))
+                // ON from 7:00pm to 11.59pm
+                if ((DateTime.Now.Hour > 18) && (DateTime.Now.Hour <= 23))
                 {
                     // Switch Grow Lights ON
                     if (TankLightSwitchPin.Read() == GpioPinValue.Low)
@@ -632,10 +632,12 @@ namespace SAP
         /// <param name="body"></param>
         private async void About_Click(object sender, RoutedEventArgs e)
         {
+            var assyVersion = typeof(App).GetTypeInfo().Assembly.GetName().Version;            
+
             ContentDialog about = new ContentDialog()
             {
                 Title = "About SAP",
-                Content = "Smart Aquaponics System Prototype\n" + "Developed by Myron Richard Dennison",
+                Content = "Smart Aquaponics System Prototype\n" + "Developed by Myron Richard Dennison\n" + "Version: " + assyVersion.ToString(),                
                 CloseButtonText = "Close"
             };
 
